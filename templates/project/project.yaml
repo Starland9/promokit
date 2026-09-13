@@ -1,0 +1,94 @@
+# ============================================================
+#  promokit – projet "__NAME__"
+#  Tout ce qui coûte de l'argent est marqué [PAYANT]. Rien n'est dépensé sans `--yes`,
+#  et jamais au-delà de budget.max_usd. Les résultats sont mis en cache : relancer est gratuit.
+#  Autres formats (TikTok, Reels...) : créer variants/<format>.yaml (clés de format : voir examples/faismoncv-tiktok) et passer --variant.
+# ============================================================
+name: __NAME__
+site:
+  url: __URL__
+
+video: {width: 1920, height: 1080, fps: 30}
+
+budget:
+  max_usd: 5.0            # plafond cumulé pour ce projet (le ledger fait foi)
+  per_call_max_usd: 1.5   # un seul appel ne peut pas dépasser ça (ex: clip 15 s en 2K = 1,95 $ -> refusé)
+  max_clips_per_run: 6    # garde-fou contre les boucles
+
+# [PAYANT ~0,10 $ / 1000 caractères] Voix off avec une voix clonée de votre compte MiniMax (clonage : 1,5 $/voix, jamais fait par promokit).
+voice:
+  voice_id: ""          # vide = PROMOKIT_VOICE_ID du .env ; liste des voix : `promokit voices`
+  model: speech-2.8-hd    # speech-2.8-turbo = 0,06 $/1k caractères
+  language: French
+  speed: 1.0
+
+script:                   # un segment = un fichier vo/<id>.mp3 ; le texte sert aussi de sous-titre
+  - {id: s1_hook,  text: "Accroche en une phrase."}
+  - {id: s2_intro, text: "Présentation du produit en une phrase."}
+  - {id: s8_cta,   text: "Rendez-vous sur mon site point com."}
+
+# [PAYANT] Clips MiniMax H3 : brouillon 768P (0,08 $/s) puis, seulement si approve: true, régénération 2K (+0,05 $/s).
+# Prompts : format officiel h3-prompt-writing (integrated_multimodal_description / overall_soundscape / non_diegetic_music,
+# ou les 6 sections Ref2VA quand il y a des images de référence). Voir prompts/*.txt.
+clips_defaults: {model: MiniMax-H3, draft_resolution: 768P, final_resolution: 2K, ratio: "16:9"}
+clips:
+  - id: A_hook
+    duration: 8
+    prompt_file: prompts/A_hook.txt
+    approve: false        # passer à true une fois le brouillon validé -> `promokit upscale`
+  - id: E_success
+    duration: 7
+    prompt_file: prompts/E_success.txt
+    refs:
+      - {role: reference_image, frame: {clip: A_hook, t: 1.5}}   # même personnage que le clip A (image extraite automatiquement)
+
+# [GRATUIT] Scènes produit enregistrées avec Playwright (curseur simulé, 30 fps). Voir promokit/screens/actions.py pour les étapes.
+screens:
+  scenes:
+    sc1_home:
+      start: {url: "/", cursor: [1180, 660]}
+      steps:
+        - wait: 1.2
+        - mark: scroll
+        - scroll: {to: 600, dur: 1.6}
+        - wait: 0.8
+        - click: {selector: 'a:has-text("Commencer")', dur: 0.9, pause: 0.2}
+        - wait_load: networkidle
+        - wait: 1.5
+  captures: []            # captures fixes haute résolution, ex: {id: doc, url: "/edit", dpr: 2, element: {selector: "#preview"}, out: doc_2x.png}
+
+# [GRATUIT] Habillage (Pillow). Types: title, chip, url_tag, endcard, doc_hero.
+overlays:
+  fonts: {heading: assets/fonts/Sora.ttf, body: assets/fonts/DMSans.ttf, dir: assets/fonts}
+  colors: {primary: "#4a21ed", accent: "#b447eb", ink: "#111117"}
+  items:
+    - {id: hook_title, type: title, text: "Une phrase choc."}
+    - {id: url_tag, type: url_tag, text: "monsite.com"}
+    - {id: chip_feature, type: chip, text: "Fonctionnalité clé"}
+    - {id: endcard, type: endcard, headline: "Essaie-le maintenant.", url: "monsite.com", tagline: "Point 1 · Point 2 · Point 3"}
+
+# Musique : l'API musique MiniMax est fermée aux nouveaux comptes -> piste libre de droits (ex. mixkit.co, licence gratuite).
+music: {src: assets/music/bed.wav, gain: 0.5}
+
+# [GRATUIT] Montage. src = clip:<id> | scene:<nom> | overlay:<id> | chemin. Coupes franches: xfade 0 ; fondu: xfade 0.5.
+# Temps relatifs: "seg3+0.5" (0,5 s après le début du segment 3) ou "<id de segment>+0.5", "seg3-0.2" = 0,2 s avant sa fin.
+output: {name: __NAME___promo.mp4}
+timeline:
+  segments:
+    - {id: hook,  src: "clip:A_hook",   in: 0.0, out: 8.0, xfade: 0.5}
+    - {id: home,  src: "scene:sc1_home", in: 0.3, out: 7.0, speed: 1.2, xfade: 0.6}
+    - {id: win,   src: "clip:E_success", in: 0.0, out: 7.0, xfade: 0.8}
+    - {id: end,   src: "overlay:endcard", still: true, len: 5.0, zoom: 1.03}
+  overlays:
+    - {id: hook_title, t: ["hook+1.0", "hook-0.6"], fade: 0.5, slide: 24}
+    - {id: url_tag, t: ["home+0.3", "win-0.5"], fade: 0.5}
+    - {id: chip_feature, t: ["home+0.6", "home-0.3"], fade: 0.35, slide: 30}
+  audio:
+    vo:
+      - {id: s1_hook,  t: "hook+0.7"}
+      - {id: s2_intro, t: "home+0.3"}
+      - {id: s8_cta,   t: "win+0.3"}
+    ambient:
+      - {src: "clip:A_hook", in: 0.0, out: 8.0, t: "hook+0", gain: 0.35}
+      - {src: "clip:E_success", in: 0.0, out: 7.0, t: "win+0", gain: 0.35}
+    music: {src: assets/music/bed.wav, gain: 0.5, sc_thresh: 0.02, sc_ratio: 6}

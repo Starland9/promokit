@@ -1,0 +1,13 @@
+subject_definitions:
+<Subject 1> is the young Cameroonian man in <Picture 1>: mid-20s, short dark hair, close-trimmed beard, medium-dark skin, athletic build. In the target video he wears a crisp white long-sleeved shirt with the sleeves neatly buttoned and dark trousers instead of the blue shirt seen in <Picture 1>.
+
+summary: [reference generation] The target video is a 7-second live-action documentary-style scene in which <Subject 1> walks into a bright modern office meeting room, shakes hands with a smiling recruiter, and sits down for an interview, radiating calm confidence.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1], [Shot 2]): partially_preserved - face, hairstyle, beard, skin tone and build are kept identical to <Picture 1>; clothing changes to a white shirt and the environment changes to a modern office.
+
+detailed_description: Live-action, documentary realism, bright natural daylight through floor-to-ceiling windows, soft neutral office tones, shallow depth of field, 35mm photographic feel. [Shot 1] A medium tracking shot follows <Subject 1> from a slight three-quarter angle as he walks through the glass door of a modern meeting room holding a slim dark-blue folder, shoulders relaxed. A Cameroonian woman recruiter in her mid-30s with braided hair tied back, wearing a tailored beige blazer, stands up from a light wooden table with a laptop and a glass of water on it, extends her hand and smiles warmly. The camera slows to a static shot as <Subject 1> shakes her hand firmly and smiles back with confidence. [Shot 2] At 00:04.200, the camera cuts to a medium close-up from across the table: <Subject 1> sits down, places the folder on the table, unbuttons nothing, and looks at the recruiter with an attentive, relaxed expression while she gestures toward the chair; soft green plants and a city skyline are blurred behind the window.
+
+overall_soundscape: Bright office ambience with a quiet air-conditioning hum and muffled distant voices, confident footsteps on a hard floor, a glass door closing softly, the brief sound of a handshake and clothing movement, and the light knock of a folder set on a wooden table followed by a chair pulled in.
+
+non_diegetic_music: N/A

@@ -1,0 +1,28 @@
+# environnement
+.venv/
+__pycache__/
+*.egg-info/
+.env
+.claude/agent-memory/
+.claude/settings.local.json
+
+# état local et dépenses
+cache/
+ledger.jsonl
+
+# espace de travail : vos projets, marques, captures et médias (jamais versionnés)
+projects/
+
+# exemples : seuls project.yaml et prompts/ sont versionnés
+examples/*/vo/
+examples/*/clips/
+examples/*/screens/out/
+examples/*/overlays/
+examples/*/build/
+examples/*/assets/
+
+# guides MiniMax (MiniMax H3 Community License) : bash scripts/fetch_h3_guides.sh
+docs/h3-prompting/*.txt
+docs/h3-prompting/SKILL.md
+.claude/skills/h3-prompting/base-en.txt
+.claude/skills/h3-prompting/ref-en.txt

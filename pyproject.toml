@@ -1,0 +1,17 @@
+[project]
+name = "promokit"
+version = "0.1.0"
+description = "Reusable, budget-guarded pipeline to produce product promo videos with MiniMax H3 + cloned voice + real screen captures."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.31", "pyyaml>=6.0", "pillow>=10.0", "playwright>=1.45", "numpy>=1.26"]
+
+[project.scripts]
+promokit = "promokit.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["promokit*"]

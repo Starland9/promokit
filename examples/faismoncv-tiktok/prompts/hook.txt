@@ -1,0 +1,5 @@
+integrated_multimodal_description: [Shot 1] Live-action, documentary realism, natural late-afternoon window light, shallow depth of field, vertical 9:16 framing, 50mm photographic feel. A medium close-up frames a young Cameroonian man in his mid-20s with short hair, wearing a light blue short-sleeved shirt, seated at a small wooden desk in a bright, modest apartment in Douala. He stares at an old silver laptop, rubs his forehead with one hand and exhales slowly; printed résumés lie scattered on the desk. The camera pushes in with small amplitude at slow speed toward his tired face. [Shot 2] At 00:03.500, the camera cuts to an over-the-shoulder close-up of the laptop screen showing a plain, badly formatted white text document with cramped paragraphs too small to read; he leans back and slowly closes the laptop lid halfway.
+
+overall_soundscape: Quiet room tone with a ceiling fan humming softly, distant motorbike horns through an open window, a soft sigh, paper shifting on the desk and the muted click of the laptop lid.
+
+non_diegetic_music: N/A

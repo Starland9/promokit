@@ -1,0 +1,83 @@
+# ============================================================
+#  Exemple minimal promokit : vidéo TikTok (1080x1920) de Fais Mon CV, https://cv.starland9.dev
+#
+#  promokit plan faismoncv-tiktok          coût estimé : voix ~0,03 $ + 1 clip H3 6 s en 768P 0,48 $ (rien n'est dépensé)
+#  promokit screens faismoncv-tiktok       gratuit : filme le vrai site en émulation mobile
+#  promokit overlays faismoncv-tiktok      gratuit : téléphone, titre, pastille, carte de fin
+#  promokit vo faismoncv-tiktok --yes      payant : voix off (voice_id dans .env : PROMOKIT_VOICE_ID)
+#  promokit clips faismoncv-tiktok --yes   payant : clip d'accroche
+#  promokit assemble faismoncv-tiktok      gratuit : montage + sous-titres mot à mot
+#
+#  Toutes les sorties (vo/, clips/, screens/out/, overlays/, build/) sont générées ici et ignorées par git.
+# ============================================================
+name: faismoncv-example
+site: {url: https://cv.starland9.dev}
+video: {width: 1080, height: 1920, fps: 30}
+output: {name: faismoncv_tiktok.mp4}
+budget: {max_usd: 1.0, per_call_max_usd: 0.6, max_clips_per_run: 1}
+
+voice: {voice_id: "", model: speech-2.8-hd, language: French}
+
+# text = ce que dit la voix ; display = ce qu'affichent les sous-titres (facultatif)
+script:
+  - {id: hook, text: "Un recruteur ne passe que quelques secondes sur un CV. Le tien, il donne envie d'en lire plus ?"}
+  - {id: demo, text: "Avec Fais Mon CV, tu choisis un modèle, tu remplis tes infos, et ton CV est prêt en quelques minutes."}
+  - {id: cta, text: "Rendez-vous sur CV point starland neuf point dev.", display: "Rendez-vous sur cv.starland9.dev."}
+
+clips_defaults: {model: MiniMax-H3, draft_resolution: 768P, final_resolution: 2K, ratio: "9:16"}
+clips:
+  - {id: hook, duration: 6, prompt_file: prompts/hook.txt}
+
+screens:
+  viewport: {width: 432, height: 768, dpr: 2.5, mobile: true, cursor: tap}
+  scenes:
+    templates:
+      start: {url: "/templates", cursor: [216, 500]}
+      steps:
+        - wait: 0.5
+        - scroll: {to: 1400, dur: 2.0}
+        - scroll: {to: 0, dur: 1.0}
+        - scroll_to: {selector: 'a[href="/edit?template=modern"]', offset: 430, dur: 0.8}
+        - click: {selector: 'a[href="/edit?template=modern"]', dur: 0.4, pause: 0.2}
+        - wait_load: networkidle
+        - wait: 0.5
+    editor:
+      steps:
+        - scroll_to: {selector: "#name", offset: 230, dur: 0.6}
+        - type: {selector: "#name", text: "Awa Ngono", delay: 20}
+        - type: {selector: "#title", text: "Comptable", delay: 20}
+        - wait: 0.4
+        - scroll: {to: 0, dur: 0.5}
+        - click: {role: button, name: "Aperçu", dur: 0.4, pause: 1.5}
+
+overlays:
+  fonts: {heading: ../../templates/project/assets/fonts/Sora.ttf, body: ../../templates/project/assets/fonts/DMSans.ttf, dir: ../../templates/project/assets/fonts}
+  colors: {primary: "#4a21ed", accent: "#b447eb", ink: "#111117"}
+  items:
+    - {id: phone, type: device_frame, x: 180, y: 370, w: 720, h: 1280, radius: 58, bezel: 16}
+    - {id: hook_title, type: title, text: "Ton CV donne envie ?", caps: true, size: 100, y: 250, max_width: 900, gradient: top, underline: false}
+    - {id: chip, type: chip, text: "17 modèles · Export PDF", align: center, y: 200, size: 40}
+    - {id: endcard, type: endcard, headline: "Crée le CV qui te ressemble.", headline_size: 96, url: cv.starland9.dev, url_size: 64, y: 560}
+
+captions: {mode: words, burn: true, font: Promokit Caption, font_file: ../../templates/project/assets/fonts/Sora.ttf, weight: 800, size: 76, caps: true, max_words: 3, highlight: "#FFD84D", y: 1450, keep: ["Fais Mon CV"]}
+
+timeline:
+  audio:
+    vo_tempo: 1.08
+    # musique facultative, non fournie (licence) : ex. curl -L -o assets/music/bed.mp3 https://assets.mixkit.co/music/1167/1167.mp3
+    music: {src: assets/music/bed.mp3, gain: 0.5}
+  beats:                       # un beat par phrase ; sa durée suit la voix et les plans s'y ajustent
+    - id: hook
+      vo: hook
+      shots: [{src: "clip:hook", ambient: 0.3}]
+      overlays: [{id: hook_title, from: 0.0, to: -0.3}]
+    - id: demo
+      vo: demo
+      shots:
+        - {src: "scene:templates", frame: phone}
+        - {src: "scene:editor", frame: phone}
+      overlays: [{id: chip, from: 0.1, to: -0.15, slide: 20}]
+    - id: cta
+      vo: cta
+      extra: 1.5
+      shots: [{src: "overlay:endcard", still: true, zoom: 1.03}]
