@@ -1,0 +1,13 @@
+subject_definitions:
+<Subject 1> is the motion design system in <Picture 1>: a clean 2D editorial explainer style with a deep charcoal-navy gradient background and soft blue glow, off-white rounded modules, solid blue connector lines, green and red accent pills, icon-like squares, circles and bars only, crisp vector edges, soft grain, smooth parallax spacing, and absolutely no letters, numbers, document-like text lines or logos.
+
+summary: [reference generation] Keep <Subject 1> fully consistent while showing the failure scenario of the concept: the same two modules and connector, but the exchange breaks; the mood turns red and unstable without ever adding text.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - same background family, same off-white modules, same blue connector, same accent palette, same crisp 2D vector treatment, same no-text rule; only the choreography and the dominant accent color change from blue to red.
+
+detailed_description: Clean 2D motion design, editorial explainer style, vertical smartphone framing, subtle parallax, crisp vector shapes, abstract infographic only, no readable text anywhere. [Shot 1] The client module and the server module from <Picture 1> sit in their positions when a blue packet leaves the client and travels down the connector; halfway, a red hexagonal shape slides in from the right, intercepts the packet and the connector flashes red, the packet splitting into a few small red fragments that scatter and fade. [Shot 2] At 00:03.500, the camera cuts slightly closer to the server module, which flickers, tilts a few degrees and emits a red warning pulse while a red bar grows across the bottom of the module; the composition shakes once with small amplitude and settles into a tense, unbalanced state, still made only of abstract shapes, with no logos and no text.
+
+overall_soundscape: A soft whoosh, a sharp digital interception blip, a short glitch crackle with tiny fragment hits, a low warning pulse and a brief impact stop. No speech, no room tone, no music.
+
+non_diegetic_music: N/A

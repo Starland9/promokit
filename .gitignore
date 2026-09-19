@@ -26,7 +26,6 @@ docs/h3-prompting/*.txt
 docs/h3-prompting/SKILL.md
 .claude/skills/h3-prompting/base-en.txt
 .claude/skills/h3-prompting/ref-en.txt
-
-
+100-concepts-backend-tiktok.md
+assets/
 uv.lock
-assets

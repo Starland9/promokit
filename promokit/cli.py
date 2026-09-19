@@ -7,7 +7,7 @@ from .config import Project
 from .pricing import Pricing
 from .ledger import Ledger, BudgetGuard, BudgetExceeded, ConfirmationRequired
 from .cache import Cache, key_of
-from . import voice, clips as clipmod, overlays as ovmod, assemble as asm
+from . import voice, clips as clipmod, overlays as ovmod, assemble as asm, hooks as hk
 
 KIT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -39,10 +39,21 @@ def _mm():
 
 
 def cmd_init(a):
+    if a.kind in ("learning", "learning-tiktok"):
+        return cmd_concept(
+            argparse.Namespace(
+                name=a.name,
+                num=None,
+                title=a.title or a.name,
+                angle=a.angle or "",
+                series=a.series,
+                handle=a.handle,
+            )
+        )
     dst = KIT / "projects" / a.name
     if dst.exists():
         sys.exit(f"{dst} already exists")
-    shutil.copytree(KIT / "templates" / "project", dst)
+    shutil.copytree(KIT / "templates" / a.kind, dst)
     y = dst / "project.yaml"
     s = (
         y.read_text()
@@ -53,6 +64,49 @@ def cmd_init(a):
     print(
         f"created {dst}\n  1) edit {y}\n  2) promokit plan {a.name}\n  3) promokit run {a.name} --yes"
     )
+
+
+def cmd_concept(a):
+    """Scaffold a learning-TikTok project (templates/learning-tiktok): hook, 6-beat script skeleton, H3 motion-design prompts, free variant."""
+    title, angle, num = a.title, a.angle or "", a.num
+    if num is not None:
+        row = hk.concept_lookup(KIT, int(num))
+        if row:
+            title = title or row[0]
+            angle = angle or row[1]
+        elif not title:
+            sys.exit(
+                f"concept #{num} not found in {KIT / '100-concepts-backend-tiktok.md'}; pass --title"
+            )
+    if not title:
+        sys.exit(
+            'give --num <n> (row of 100-concepts-backend-tiktok.md) and/or --title "..."'
+        )
+    try:
+        hk.scaffold(KIT, a.name, title, angle, num, a.series, a.handle)
+    except (FileExistsError, FileNotFoundError) as e:
+        sys.exit(str(e))
+
+
+def cmd_hooks(a):
+    slots = {"concept": a.concept} if a.concept else {}
+    for kv in a.slot or []:
+        k, _, v = kv.partition("=")
+        slots[k.strip()] = v.strip()
+    hk.print_hooks(slots, a.family)
+
+
+def cmd_script(a):
+    p = _project(a.project)
+    pricing = Pricing(p.get("pricing"))
+    n = hk.lint(p, pricing)
+    if n and a.strict:
+        sys.exit(1)
+
+
+def cmd_words(a):
+    p = _project(a.project)
+    hk.word_report(p, only=a.only)
 
 
 def cmd_check(a):
@@ -380,10 +434,51 @@ def cmd_cache_import(a):
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="promokit", description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    s = sub.add_parser("init", help="create a project from the template")
+    s = sub.add_parser("init", help="create a project from a template")
     s.add_argument("name")
     s.add_argument("--url")
+    s.add_argument(
+        "--kind",
+        default="project",
+        help="project (16:9 promo) | learning (TikTok concept video)",
+    )
+    s.add_argument("--title")
+    s.add_argument("--angle")
+    s.add_argument("--series", default="100 Concepts Backend")
+    s.add_argument("--handle", default="@starland9")
     s.set_defaults(fn=cmd_init)
+    s = sub.add_parser(
+        "concept",
+        help="scaffold a learning TikTok project (free): --num 4 reads 100-concepts-backend-tiktok.md, or --title/--angle",
+    )
+    s.add_argument("name")
+    s.add_argument("--num", type=int)
+    s.add_argument("--title")
+    s.add_argument("--angle")
+    s.add_argument("--series", default="100 Concepts Backend")
+    s.add_argument("--handle", default="@starland9")
+    s.set_defaults(fn=cmd_concept)
+    s = sub.add_parser("hooks", help="hook formulas for educational videos (free)")
+    s.add_argument("--concept")
+    s.add_argument("--family")
+    s.add_argument(
+        "--slot", nargs="*", help='key=value, e.g. symptome="ta requête met 8 s"'
+    )
+    s.set_defaults(fn=cmd_hooks)
+    s = sub.add_parser(
+        "script",
+        help="lint the voice-over script: durations, hook, display, recap, cost (free)",
+    )
+    s.add_argument("project")
+    s.add_argument("--strict", action="store_true", help="exit 1 on warnings")
+    s.set_defaults(fn=cmd_script)
+    s = sub.add_parser(
+        "words",
+        help="word timings of the generated voice-over, for @mot references (free)",
+    )
+    s.add_argument("project")
+    s.add_argument("--only", nargs="*")
+    s.set_defaults(fn=cmd_words)
     s = sub.add_parser("check", help="verify tools, API key, voices")
     s.add_argument("project", nargs="?")
     s.set_defaults(fn=cmd_check)

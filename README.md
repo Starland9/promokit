@@ -60,6 +60,11 @@ promokit assemble monprojet --sub --proxies   # montage + version sous-titrée +
 promokit run monprojet --yes --sub --proxies  # tout enchaîner (s'arrête avant de dépasser le plafond)
 promokit ledger [monprojet]     # historique des dépenses
 promokit cache-import monprojet # enregistrer des fichiers déjà générés (vo/, clips/) pour ne jamais les repayer
+# vidéo pédagogique (concept expliqué), tout gratuit :
+promokit concept jour12 --num 12       # projet depuis templates/learning-tiktok (ligne 12 de 100-concepts-backend-tiktok.md) ; ou --title/--angle
+promokit hooks --concept "les index"   # 13 familles d'accroches avec exemples et slots
+promokit script jour12                 # lint du script : durées estimées/réelles, accroche, display, récap, coût
+promokit words jour12                  # début de chaque mot de la voix générée -> from: "@mot" dans les beats
 ```
 
 ## Anatomie d'un projet
@@ -77,7 +82,7 @@ overlays/         PNG d'habillage
 build/            vidéo finale, subtitles.srt, proxies
 ```
 
-Le fichier `project.yaml` du template (16:9, timeline en segments) est commenté ligne par ligne.
+Le fichier `project.yaml` du template (16:9, timeline en segments) est commenté ligne par ligne ; `templates/learning-tiktok` est le template des vidéos pédagogiques (`promokit concept`).
 [`examples/faismoncv-tiktok`](examples/faismoncv-tiktok/project.yaml) est un exemple minimal et complet au format TikTok : 3 phrases de voix off,
 1 clip H3, 2 scènes du vrai site en émulation mobile, habillage, sous-titres mot à mot. Coût : ~0,49 $ si l'on génère tout
 (`promokit plan faismoncv-tiktok`) ; `screens`, `overlays` et `assemble` sont gratuits. Les commandes acceptent un nom de `projects/` ou d'`examples/`, ou un chemin.
@@ -177,6 +182,36 @@ timeline:
       overlays: [{id: chip_templates, from: 0.1, to: -0.15, slide: 20}]
 ```
 
+## Vidéos pédagogiques TikTok (un concept expliqué en 35-60 s)
+
+Pour une série comme « 100 Concepts Backend » (programme dans `100-concepts-backend-tiktok.md`), le design et l'animation viennent de **MiniMax H3**
+(clips motion design 2D) et promokit ajoute ce qui doit être exact : titres, pastilles, carte de code, sous-titres, carte de fin. Méthode complète dans le skill
+[`tiktok-learning`](.claude/skills/tiktok-learning/SKILL.md) ; template [`templates/learning-tiktok`](templates/learning-tiktok/project.yaml).
+
+```bash
+promokit concept jour12 --num 12                           # 6 beats : accroche, définition, problème, mécanisme, prod, récap
+promokit hooks --concept "les index" --slot symptome="ta requête met 8 s"
+promokit script jour12                                     # 0 WARN avant de payer la voix
+promokit overlays jour12 --variant gratuit && promokit assemble jour12 --variant gratuit --proxies   # 0 $ : rythme et lisibilité
+promokit plan jour12                                       # ~2 $ : voix 0,06 $ + 4 clips H3 de 6 s en 768P
+promokit vo jour12 --yes && promokit words jour12          # puis from: "@certificat" sur les pastilles
+promokit clips jour12 --yes --only A_hook                  # planche, puis B_concept (ancre de style), C_problem, D_solution
+promokit assemble jour12 --sub --proxies
+```
+
+| Brique | Clé | Effet |
+|---|---|---|
+| Accroches | `promokit hooks` | 13 familles (erreur, vécu, symptôme, mythe, duel, chiffre, incident, entretien…) avec règles : première phrase ≤ 3 s, boucle ouverte |
+| Lint du script | `promokit script` | débit réel mesuré (11,3 car/s, sigles et chiffres plus lents), accroche trop longue, chiffres sans `display`, récap manquant, durée totale, coût |
+| Calage sur la voix | `from: "@mot"`, `@mot:2`, `@mot.end`, `@mot+0.3` | une pastille apparaît quand le mot est prononcé (`promokit words` liste les mots et les pauses) |
+| Carte de code | overlay `type: code` (`lang`, `lines`, `hl`, `title`, `numbers`, `style: terminal`) | requête HTTP, SQL, config… en police mono (JetBrains Mono détectée, sinon DejaVu), colorée, ≤ 5 lignes |
+| Motion design cohérent | clip B en T2VA + C/D en Ref2VA sur une image de B (`frame: {clip: B_concept, t: 2.0}`) | même système graphique sur toute la vidéo ; bibliothèque de prompts par famille de concept dans `.claude/skills/tiktok-learning/prompts/` |
+| Image de départ dessinée | `refs: [{role: first_frame, overlay: hook_title}]` | H3 anime une carte ou un schéma rendu par promokit (I2VA) |
+| Version 0 $ | `variants/gratuit.yaml` | fond, pastilles, code, musique en mesures ; sert à valider le rythme avant de payer |
+
+Règles de lisibilité sur téléphone : titre ≥ 96 px, pastille ≥ 40 px, 2 à 5 mots par pastille, 3 pastilles par beat, un message par écran, changement visuel
+toutes les 2-4 s ; planche de contrôle à `scale=270:-1` pour juger.
+
 ## Apps mobiles (Play Store, App Store)
 
 Une app native ne se filme pas avec Playwright : on anime ses captures d'écran. Cette méthode a servi à produire la vidéo TikTok de l'app Android Omoh,
@@ -224,7 +259,7 @@ Sans musique, l'assemblage continue et le signale. Les polices du template sont 
 
 ## Agent et skills Claude Code
 
-`.claude/` contient un sous-agent et quatre skills. Claude Code les découvre en ouvrant ce dossier. Pour les utiliser depuis un dossier parent, créer des liens symboliques dans son `.claude/` ; les skills retrouvent le kit à travers les liens.
+`.claude/` contient deux sous-agents et cinq skills. Claude Code les découvre en ouvrant ce dossier. Pour les utiliser depuis un dossier parent, créer des liens symboliques dans son `.claude/` ; les skills retrouvent le kit à travers les liens.
 
 | Élément | Rôle |
 |---|---|
@@ -233,6 +268,8 @@ Sans musique, l'assemblage continue et le signale. Les polices du template sont 
 | `/h3-prompting` | Écriture des prompts H3 (guides officiels via `scripts/fetch_h3_guides.sh`, exemples validés, cohérence de personnage). |
 | `/promo-scenes` | Reconnaissance d'un site (`scripts/probe_site.py`), mini-langage des scènes Playwright, floutage de captures (`scripts/redact_screens.py`). |
 | `/promo-edit` | Script de voix off, timeline, habillage, audio, montage sur la musique (`scripts/beatgrid.py`), QC (`scripts/qc.sh`). |
+| `/tiktok-learning` | Vidéo pédagogique : structure en 6 beats, accroches, lint du script, direction artistique lisible, prompts H3 motion design 2D (`prompts/md_*.txt`), calage `@mot`, QC téléphone. |
+| agent `concept-producer` | Produit un épisode de la série de concepts de bout en bout (concept → hooks → script → prompts → gratuit → payant si `BUDGET OK: $x` → QC). |
 
 Exemple : `Utilise le sous-agent promo-producer pour une vidéo de présentation de https://monsite.com. BUDGET OK: $5`.
 Sans la phrase de budget, l'agent livre une version à 0 $ et le plan de coûts de la version complète, sans rien dépenser.

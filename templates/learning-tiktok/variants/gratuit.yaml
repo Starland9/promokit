@@ -1,0 +1,55 @@
+# ============================================================
+#  Variante gratuit (0 $) — __TITLE__ : montage texte + musique, aucune voix, aucun clip H3.
+#  promokit overlays __NAME__ --variant gratuit && promokit assemble __NAME__ --variant gratuit --proxies
+#  Durées en mesures (bpm de la musique : python .claude/skills/promo-edit/scripts/beatgrid.py assets/music/bed.wav)
+# ============================================================
+script: []
+clips: []
+output: {name: __SLUG___gratuit.mp4}
+
+timeline:
+  bpm: 100
+  beats_per_bar: 4
+  audio:
+    music: {src: assets/music/bed.wav, in: 0, gain: 0.92, fade_in: 0.06, fade_out: 1.8}
+  beats:
+    - id: hook
+      bars: 3
+      shots: [{src: "overlay:bg_base", still: true, zoom: 1.06}]
+      overlays:
+        - {id: hook_title,   from: 0.15, to: -0.2, fade: 0.35}
+        - {id: chip_concept, from: 1b,   to: -0.2, fade: 0.3, slide: 22}
+    - id: def
+      bars: 3
+      shots: [{src: "overlay:bg_base", still: true, zoom: 1.08, zoom_y: 0.4}]
+      overlays:
+        - {id: t_def,     from: 0.0, to: -0.2, fade: 0.3}
+        - {id: chip_def1, from: 1b,  to: -0.2, fade: 0.3, slide: 22}
+        - {id: chip_def2, from: 5b,  to: -0.2, fade: 0.3, slide: 22}
+    - id: problem
+      bars: 3
+      shots: [{src: "overlay:bg_base", still: true, zoom: 1.1, zoom_y: 0.7}]
+      overlays:
+        - {id: t_problem, from: 0.0, to: -0.2, fade: 0.3}
+        - {id: chip_pb1,  from: 1b,  to: -0.2, fade: 0.3, slide: 22}
+        - {id: chip_pb2,  from: 5b,  to: -0.2, fade: 0.3, slide: 22}
+    - id: how
+      bars: 4
+      shots: [{src: "overlay:bg_base", still: true, zoom: 1.06, zoom_y: 0.5}]
+      overlays:
+        - {id: code_how,  from: 0.0, to: -0.2, fade: 0.3}
+        - {id: chip_how1, from: 2b,  to: -0.2, fade: 0.3, slide: 22}
+        - {id: chip_how2, from: 6b,  to: -0.2, fade: 0.3, slide: 22}
+        - {id: chip_how3, from: 10b, to: -0.2, fade: 0.3, slide: 22}
+    - id: prod
+      bars: 3
+      shots: [{src: "overlay:bg_base", still: true, zoom: 1.08, zoom_y: 0.3}]
+      overlays:
+        - {id: t_prod,     from: 0.0, to: -0.2, fade: 0.3}
+        - {id: chip_prod1, from: 1b,  to: -0.2, fade: 0.3, slide: 22}
+        - {id: chip_prod2, from: 5b,  to: -0.2, fade: 0.3, slide: 22}
+    - id: recap
+      bars: 3
+      shots: [{src: "overlay:endcard", still: true, zoom: 1.03}]
+      overlays:
+        - {id: url_tag, from: 0.3, to: -0.2, fade: 0.3}
