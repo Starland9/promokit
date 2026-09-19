@@ -44,6 +44,11 @@ promokit run <projet> [--yes] [--sub] [--proxies]    # tout enchaîner
 promokit ledger [<projet>]                           # dépenses
 # toutes les commandes acceptent --variant <nom> (variants/<nom>.yaml : tiktok, reels, carré...) qui réutilise voix et clips payés
 promokit cache-import <projet> [--record-spend]      # enregistrer des fichiers déjà générés
+# vidéo pédagogique (skill tiktok-learning), tout gratuit :
+promokit concept <projet> --num 12 | --title "…" --angle "…"   # projet depuis templates/learning-tiktok (6 beats, 4 clips H3 motion design)
+promokit hooks --concept "…" [--slot symptome="…"]   # 13 familles d'accroches avec exemples
+promokit script <projet>                             # lint du script : durées, accroche, display, récap, coût
+promokit words <projet> [--only s1_hook]             # début de chaque mot de la voix générée -> from: "@mot" dans les beats
 ```
 
 ## Ordre de travail
@@ -58,6 +63,10 @@ promokit cache-import <projet> [--record-spend]      # enregistrer des fichiers 
 ## Sans budget chiffré : livrer quand même une vidéo
 
 Sans `BUDGET OK: $x`, ne pas s'arrêter au plan : produire une version complète à 0 $ dans `variants/gratuit.yaml` (`script: []`, `clips: []`, montage sur la musique avec textes, écrans réels et habillage), la livrer, puis préparer la version payante dans `project.yaml` (script, prompts H3 en 9:16) et la valider sans dépense : copie du projet dans le scratchpad, voix et clips remplacés par des fichiers factices de durée réaliste, `assemble` sur la copie. Rapporter le coût exact de `promokit plan`. Structure : `variants/gratuit.yaml` avec `script: []`, `clips: []`, `timeline.bpm` et `beats[].bars` (README, section « Apps mobiles »).
+
+## Vidéo pédagogique (concept expliqué, série « 100 Concepts Backend »)
+
+Skill `tiktok-learning` : structure en 6 beats, accroches, lint du script, direction artistique lisible sur téléphone, clips H3 en motion design 2D cohérents (ancre de style + Ref2VA), calage des pastilles sur les mots (`@mot`), QC à l'échelle téléphone. `promokit concept <nom> --num <n>` crée le projet ; `--variant gratuit` donne une version à 0 $.
 
 ## App mobile (Play Store / App Store)
 

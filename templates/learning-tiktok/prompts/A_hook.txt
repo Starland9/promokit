@@ -1,0 +1,5 @@
+integrated_multimodal_description: [Shot 1] Live-action, documentary realism, warm desk lamp light in a dim room at night, shallow depth of field, 50mm photographic feel, muted warm grade. Medium close-up of a young Cameroonian backend developer in his mid-20s, short hair, dark olive t-shirt, seated at a small desk in a modest apartment in Douala, a silver laptop open in front of him, a phone face-up beside the keyboard. He is relaxed, typing slowly, when the phone lights up and vibrates; his eyes move to it and his expression tightens as he reads. The camera pushes in with small amplitude at slow speed toward his face. [Shot 2] At 00:03.500, the camera cuts to a tighter over-the-shoulder angle: he grabs the phone, glances back at the laptop, leans forward and rubs his forehead with one hand, jaw tense. The laptop screen and the phone screen stay completely out of focus and unreadable. No logos, no readable text, no interface details.
+
+overall_soundscape: Quiet apartment room tone at night, a ceiling fan, distant traffic through a window, a phone vibrating twice on wood, slow keyboard taps that stop, a short exhale and a chair creak.
+
+non_diegetic_music: N/A

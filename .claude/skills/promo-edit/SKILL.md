@@ -54,6 +54,9 @@ Variante `variants/<format>.yaml` (ou projet vertical direct). Exemple complet e
 - **Pastilles** : `type: chip`, `align: center`, `y: 200`, `size: 40`, textes de 2 à 5 mots.
 - **Sous-titres** : `captions: {mode: words, burn: true, max_words: 3, max_chars: 18, min_duration: 0.45, caps: true, highlight: "#FFD84D", y: 1450, font_file: assets/fonts/Sora.ttf, weight: 800, keep: ["Fais Mon CV", "1 000"]}`. Le mot actif est calé sur les pauses détectées dans la voix ; `keep` empêche de couper une marque ou un montant entre deux sous-titres ; les sous-titres trop courts sont fusionnés.
 - **Zones sûres** : texte entre y ≈ 180 et y ≈ 1500 ; rien d'important à droite (x > 940) sous y ≈ 900 ; end card `y: 470` pour laisser la place aux sous-titres.
+- **Calage sur les mots** : après `promokit vo`, `promokit words <projet>` donne le début de chaque mot ; dans un beat, `from: "@certificat"` (aussi `@mot:2`, `@mot.end`, `@mot+0.3`) fait apparaître la pastille quand le mot est dit. Plus fiable que de lire les pauses à la main.
+- **Code à l'écran** : overlay `type: code` (`lang: http|sql|python|bash|json|yaml`, `lines`, `hl: [n]`, `title`, `size: 36-40`, ≤ 5 lignes, police mono détectée automatiquement) ; jamais une capture de doc ni une carte blanche pleine de texte.
+- **Lisibilité** : planche à l'échelle téléphone `scale=270:-1` ; ce qui n'y est pas lisible ne l'est pas sur TikTok. Tailles minimales : titre 96, pastille 40, code 34, sous-titres 62. Vidéo pédagogique (concept expliqué) : skill `tiktok-learning`.
 
 ## 2 ter. Montage sur la musique (sans voix off, 0 $)
 

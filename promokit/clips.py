@@ -23,7 +23,8 @@ def extract_frame(video, t: float, out):
     subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-ss", str(t), "-i", str(video), "-frames:v", "1", str(out)], check=True); return out
 
 def resolve_refs(project, clip):
-    """Returns list of (role, path) or raises if a frame dependency is not generated yet."""
+    """Returns list of (role, path) or raises if a frame dependency is not generated yet.
+    refs: {role, frame: {clip, t}} (frame of another clip) | {role, overlay: <id>} (rendered overlay PNG) | {role, path}."""
     refs = []
     for r in clip.get("refs", []):
         role = r.get("role", "reference_image")
@@ -36,6 +37,13 @@ def resolve_refs(project, clip):
             out = project.dir / "clips" / f"{src_id}_frame_{t:.2f}.png"
             if not out.exists(): extract_frame(vid, t, out)
             refs.append((role, out))
+        elif "overlay" in r:   # a promokit-rendered still (title card, diagram) as first_frame / reference_image: designed by the kit, animated by H3
+            png = project.overlays_dir / f"{r['overlay']}.png"
+            if not png.exists():
+                from .overlays import Painter
+                Painter(project).render(only=[r["overlay"]], log=lambda *a: None)
+            if not png.exists(): raise LookupError(f"clip {clip['id']}: overlay '{r['overlay']}' is not an overlays item (or is a device_frame)")
+            refs.append((role, png))
         else:
             refs.append((role, project.path(r["path"])))
     return refs

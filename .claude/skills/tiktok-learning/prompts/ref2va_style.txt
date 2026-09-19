@@ -1,0 +1,13 @@
+subject_definitions:
+<Subject 1> is the motion design system in <Picture 1>: a clean 2D editorial explainer style with a deep charcoal-navy gradient background and soft blue glow, off-white rounded modules, solid blue connector lines, green and red accent pills, icon-like squares, circles and bars only, crisp vector edges, soft grain, smooth parallax spacing, and absolutely no letters, numbers, document-like text lines or logos.
+
+summary: [reference generation] Keep <Subject 1> fully consistent while showing <LA SCÈNE DU BEAT EN UNE PHRASE>; the dominant accent turns <blue|red|green|amber> without ever adding text.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - same background family, same off-white modules, same connector treatment, same accent palette, same crisp 2D vector treatment, same no-text rule; only the choreography and the dominant accent color change.
+
+detailed_description: Clean 2D motion design, editorial explainer style, vertical smartphone framing, subtle parallax, crisp vector shapes, abstract infographic only, no readable text anywhere. [Shot 1] <CHORÉGRAPHIE DU PLAN 1, copiée d'un md_*.txt, en reprenant les modules de <Picture 1>>. [Shot 2] At 00:03.500, the camera cuts slightly closer as <CHORÉGRAPHIE DU PLAN 2 : la résolution, le pulse, l'alignement>, with no logos and no text.
+
+overall_soundscape: Soft whooshes, light snap-in ticks, <un son signature : warning pulse | confirmation tick | glitch crackle>, and a restrained synthetic ambience bed. No speech, no room tone, no music.
+
+non_diegetic_music: N/A

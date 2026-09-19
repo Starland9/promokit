@@ -1,0 +1,13 @@
+subject_definitions:
+<Subject 1> is the motion design system in <Picture 1>: a clean 2D editorial explainer style with a deep charcoal-navy gradient background and soft blue glow, off-white rounded modules, solid blue connector lines, green and red accent pills, icon-like squares, circles and bars only, crisp vector edges, soft grain, smooth parallax spacing, and absolutely no letters, numbers, document-like text lines or logos.
+
+summary: [reference generation] Keep <Subject 1> fully consistent while showing the resolved scenario: the same two modules and connector, now protected and flowing smoothly; the mood turns green, calm and confident without ever adding text.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - same background family, same off-white modules, same blue connector, same accent palette, same crisp 2D vector treatment, same no-text rule; only the choreography and the dominant accent color change from blue to green.
+
+detailed_description: Clean 2D motion design, editorial explainer style, vertical smartphone framing, subtle parallax, crisp vector shapes, abstract infographic only, no readable text anywhere. [Shot 1] The client module and the server module from <Picture 1> hold their positions while a green rounded shield shape slides over the connector and seals it with a soft glow; a blue packet leaves the client, passes safely through the shield and reaches the server, which pulses green. [Shot 2] At 00:03.500, the camera cuts slightly closer as three packets travel the connector in a steady, evenly spaced rhythm, each one landing with a small green tick shape that fades; the modules align perfectly, the shield settles at the centre and the composition rests in a calm, balanced, success-state layout with generous negative space, no logos and no text.
+
+overall_soundscape: Soft resolving whooshes, a gentle seal tone when the shield locks, three light confirmation ticks, and a restrained synthetic ambience bed. No speech, no room tone, no music.
+
+non_diegetic_music: N/A

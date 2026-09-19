@@ -1,0 +1,220 @@
+# ============================================================
+#  __NAME__ — Série « __SERIES__ » (vidéo pédagogique TikTok)
+#  Concept #__NUM__ : __TITLE__ — __ANGLE__
+#  1080x1920, ~50 s : voix off + 1 clip d'accroche (personne) + 3 clips H3 motion design 2D + habillage promokit
+#
+#  Méthode complète : skill `tiktok-learning` (hooks, script, direction artistique, prompts motion design, calage, QC).
+#  Le design et l'animation viennent de MiniMax H3 (prompts/*.txt) ; promokit ajoute titres, pastilles, code, sous-titres.
+#
+#  Ordre de travail (gratuit d'abord) :
+#    promokit hooks --concept "__TITLE__"            → choisir une accroche, écrire le script ci-dessous
+#    promokit script __NAME__                          → durées, accroche, display, récap (0 $)
+#    promokit overlays __NAME__ --variant gratuit && promokit assemble __NAME__ --variant gratuit --proxies   → texte + musique (0 $)
+#    promokit plan __NAME__                            → ~2 $ : voix 0,06 $ + 4 clips × 0,48 $
+#    promokit vo __NAME__ --yes                        → voix ; puis `promokit words __NAME__` pour caler les pastilles (@mot)
+#    promokit clips __NAME__ --yes --only A_hook       → planche de contrôle, puis B_concept, C_problem, D_solution
+#    promokit assemble __NAME__ --sub --proxies        → montage final, puis QC (skill promo-edit)
+#
+#  Règles de lisibilité (téléphone) : titre 96-110 px, pastille 40-44 px, sous-titres 62-76 px, 2 à 5 mots par pastille,
+#  3 pastilles max par beat, un seul message par écran, texte entre y 180 et y 1500, rien d'important à droite sous y 900.
+# ============================================================
+name: __NAME__
+
+video: {width: 1080, height: 1920, fps: 30}
+output: {name: __SLUG__.mp4}
+
+budget:
+  max_usd: 3.0
+  per_call_max_usd: 0.6
+  max_clips_per_run: 1
+
+voice: {voice_id: "", model: speech-2.8-hd, language: French, speed: 1.0}   # vide = PROMOKIT_VOICE_ID du .env
+
+# text = ce que dit la voix (chiffres et sigles épelés) ; display = ce qu'affichent les sous-titres (gratuit à modifier).
+# Structure : accroche (≤ 3 s, image forte) → définition → problème concret → mécanisme → bonne pratique prod → récap + numéro.
+script:
+  - id: s1_hook
+    text: "Ta prod tombe un vendredi soir ? Dans 9 cas sur 10, la cause, c'est __TITLE__."
+  - id: s2_def
+    text: "__TITLE__, c'est … en une phrase simple, avec l'image qui va avec."
+  - id: s3_problem
+    text: "Le problème concret : … ce que ça coûte quand c'est mal fait."
+  - id: s4_how
+    text: "Le mécanisme, en trois temps : un, … ; deux, … ; trois, …"
+  - id: s5_prod
+    text: "En prod : la bonne pratique, un réglage, un outil."
+  - id: s6_recap
+    text: "À retenir : … Concept __NUM__ sur cent, on continue demain."
+    display: "À retenir : … — Concept __NUM__/100"
+
+# [PAYANT] H3 768P 0,08 $/s. A = personne (accroche vécue), B = ancre de style motion design 2D (T2VA), C et D = même style (Ref2VA sur une image de B).
+clips_defaults: {model: MiniMax-H3, draft_resolution: 768P, final_resolution: 2K, ratio: "9:16"}
+clips:
+  - {id: A_hook,     duration: 6, prompt_file: prompts/A_hook.txt,     approve: false}
+  - {id: B_concept,  duration: 6, prompt_file: prompts/B_concept.txt,  approve: false}
+  - id: C_problem
+    duration: 6
+    prompt_file: prompts/C_problem.txt
+    approve: false
+    refs: [{role: reference_image, frame: {clip: B_concept, t: 2.0}}]   # <Picture 1> = le système graphique de B
+  - id: D_solution
+    duration: 6
+    prompt_file: prompts/D_solution.txt
+    approve: false
+    refs: [{role: reference_image, frame: {clip: B_concept, t: 2.0}}]
+
+# [GRATUIT] Habillage promokit. Un système visuel par série : mêmes couleurs que les prompts H3 (fond charbon, bleu, vert, rouge).
+overlays:
+  fonts:
+    heading: ../../templates/project/assets/fonts/Sora.ttf
+    body:    ../../templates/project/assets/fonts/DMSans.ttf
+    dir:     ../../templates/project/assets/fonts
+  colors: {primary: "#0D1117", accent: "#58A6FF", ink: "#E6EDF3"}
+  items:
+    - id: bg_base                       # fond commun des beats sans clip
+      type: background
+      color: "#0D1117"
+      to: "#161B22"
+      blobs:
+        - {x: 540, y: 420,  r: 320, color: "#58A6FF", alpha: 22, blur: 110}
+        - {x: 200, y: 1500, r: 260, color: "#3FB950", alpha: 16, blur: 100}
+      vignette: 0.3
+
+    # Accroche : le concept nommé en 2 lignes, un mot en couleur d'accent
+    - {id: hook_title, type: title, text: "__TITLE_LINES__", caps: true, size: 104, y: 240, max_width: 900, gradient: top, underline: false, accent_color: "#58A6FF"}
+    - &chip_glass                       # pastille « verre fumé », lisible sur un clip comme sur le fond
+      id: chip_concept
+      type: chip
+      text: "__CONCEPT_LABEL__"
+      align: center
+      y: 520
+      size: 42
+      bg: "#161B22F0"
+      fg: "#E6EDF3"
+      border: "#30363D"
+      border_width: 3
+      dot: "#58A6FF"
+
+    # Définition : un titre, 2 pastilles max
+    - {id: t_def, type: title, text: "Définition", caps: true, size: 100, y: 300, max_width: 900, color: "#58A6FF"}
+    - {<<: *chip_glass, id: chip_def1, y: 555, dot: "#58A6FF", text: "Idée clé en 4 mots"}
+    - {<<: *chip_glass, id: chip_def2, y: 690, dot: "#58A6FF", text: "Deuxième idée"}
+
+    # Problème : rouge
+    - {id: t_problem, type: title, text: "Le vrai\nproblème", caps: true, size: 100, y: 250, max_width: 900, accent: ["PROBLÈME"], accent_color: "#F85149"}
+    - {<<: *chip_glass, id: chip_pb1, y: 555, dot: "#F85149", text: "Symptôme concret"}
+    - {<<: *chip_glass, id: chip_pb2, y: 690, dot: "#F85149", text: "Ce que ça coûte"}
+
+    # Mécanisme : une carte de code (type code, police mono) plutôt qu'un paragraphe
+    - id: code_how
+      type: code
+      lang: http                        # python | js | sql | bash (terminal) | http | json | yaml
+      title: "exemple"
+      y: 620
+      w: 920
+      size: 38
+      hl: [1]
+      lines:
+        - "GET /exemple HTTP/1.1"
+        - "Host: api.exemple.com"
+        - ""
+        - "HTTP/1.1 200 OK"
+    - {<<: *chip_glass, id: chip_how1, y: 1080, dot: "#D29922", text: "1 · Premier temps"}
+    - {<<: *chip_glass, id: chip_how2, y: 1215, dot: "#D29922", text: "2 · Deuxième temps"}
+    - {<<: *chip_glass, id: chip_how3, y: 1350, dot: "#3FB950", text: "3 · Résultat"}
+
+    # Prod : vert
+    - {id: t_prod, type: title, text: "En production", caps: true, size: 100, y: 270, max_width: 900, accent: ["PRODUCTION"], accent_color: "#3FB950"}
+    - {<<: *chip_glass, id: chip_prod1, y: 555, dot: "#3FB950", text: "Bonne pratique"}
+    - {<<: *chip_glass, id: chip_prod2, y: 690, dot: "#3FB950", text: "Outil ou réglage"}
+
+    - {id: url_tag, type: url_tag, text: "__HANDLE__"}
+    - id: endcard
+      type: endcard
+      headline: "__SERIES__"
+      headline_size: 80
+      url: "__HANDLE__ · TikTok"
+      url_size: 52
+      tagline: "1 concept backend par jour"
+      y: 470
+
+captions:
+  mode: words
+  burn: true
+  font: Sora
+  fontsdir: ../../templates/project/assets/fonts
+  weight: 800
+  size: 72
+  caps: true
+  max_words: 3
+  highlight: "#58A6FF"
+  y: 1450
+  keep: []                              # expressions à ne jamais couper entre deux sous-titres (sigles, marques)
+
+# Musique (piste libre, une fois) : curl -L -o assets/music/bed.mp3 https://assets.mixkit.co/music/1167/1167.mp3
+#   ffmpeg -i assets/music/bed.mp3 -af loudnorm=I=-18:TP=-2:LRA=9 -ar 48000 -ac 2 assets/music/bed.wav
+timeline:
+  audio:
+    vo_tempo: 1.08
+    music: {src: assets/music/bed.wav, gain: 0.45}
+  beat_lead: 0.15
+  beat_tail: 0.35
+  beats:
+    # Accroche : la personne, le titre, puis la pastille du concept sur la pause de la voix
+    - id: hook
+      vo: s1_hook
+      shots: [{src: "clip:A_hook", ambient: 0.25}]
+      overlays:
+        - {id: hook_title,   from: 0.0, to: -0.3}
+        - {id: chip_concept, from: 2.6, to: -0.2, slide: 22}     # après `promokit vo` : from: "@Voilà" (promokit words)
+
+    # Définition : le clip motion design (vitesse réelle) puis le fond avec les pastilles
+    - id: def
+      vo: s2_def
+      shots:
+        - {src: "clip:B_concept", fixed: true, ambient: 0.25}
+        - {src: "overlay:bg_base", still: true, zoom: 1.08, zoom_y: 0.4}
+      overlays:
+        - {id: t_def,     from: 0.0, to: -0.2}
+        - {id: chip_def1, from: 0.6, to: -0.2, slide: 22}          # from: "@mot" une fois la voix générée
+        - {id: chip_def2, from: 3.5, to: -0.2, slide: 22}
+
+    # Problème : clip C (rouge) puis fond
+    - id: problem
+      vo: s3_problem
+      shots:
+        - {src: "clip:C_problem", fixed: true, ambient: 0.25}
+        - {src: "overlay:bg_base", still: true, zoom: 1.1, zoom_y: 0.7}
+      overlays:
+        - {id: t_problem, from: 0.0, to: -0.2}
+        - {id: chip_pb1,  from: 0.6, to: -0.2, slide: 22}
+        - {id: chip_pb2,  from: 3.5, to: -0.2, slide: 22}
+
+    # Mécanisme : carte de code + 3 temps (une pastille par temps, calée sur « un », « deux », « trois »)
+    - id: how
+      vo: s4_how
+      shots: [{src: "overlay:bg_base", still: true, zoom: 1.06, zoom_y: 0.5}]
+      overlays:
+        - {id: code_how,  from: 0.0, to: -0.2}
+        - {id: chip_how1, from: 1.0, to: -0.2, slide: 22}          # from: "@un"
+        - {id: chip_how2, from: 3.5, to: -0.2, slide: 22}          # from: "@deux"
+        - {id: chip_how3, from: 6.0, to: -0.2, slide: 22}          # from: "@trois"
+
+    # Prod : clip D (vert) puis fond
+    - id: prod
+      vo: s5_prod
+      shots:
+        - {src: "clip:D_solution", fixed: true, ambient: 0.25}
+        - {src: "overlay:bg_base", still: true, zoom: 1.08, zoom_y: 0.3}
+      overlays:
+        - {id: t_prod,     from: 0.0, to: -0.2}
+        - {id: chip_prod1, from: 0.6, to: -0.2, slide: 22}
+        - {id: chip_prod2, from: 3.2, to: -0.2, slide: 22}
+
+    # Récap + carte de fin
+    - id: recap
+      vo: s6_recap
+      extra: 1.5
+      shots: [{src: "overlay:endcard", still: true, zoom: 1.03}]
+      overlays:
+        - {id: url_tag, from: 0.3, to: -0.2}

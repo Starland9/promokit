@@ -29,6 +29,18 @@ Avec images de référence (Ref2VA), six sections dans cet ordre : `subject_defi
 - Interface réelle dans un clip : passer la capture du site en `reference_image` et la définir comme `<Subject 2>` (« the website interface shown in <Picture 2>: white page, bold wordmark "…", blue button »). Fonctionne bien sur un écran de laptop en plan épaule.
 - Durée entière 4–15 s ; `ratio: "16:9"` (ou `9:16` pour TikTok) ; brouillon 768P, 2K seulement après validation.
 
+## Motion design 2D (concepts, schémas animés, sans personnage)
+
+H3 produit de bons clips d'explication abstraits si le prompt lui interdit le texte et lui donne un système graphique précis. Ce qui a marché (séries « codes HTTP », « REST vs GraphQL ») :
+
+- Bloc de style en tête de `[Shot 1]`, à garder mot pour mot d'un clip à l'autre : `Clean 2D motion design, editorial explainer style, vertical smartphone framing, deep charcoal-navy gradient background with a soft blue glow, off-white rounded modules, solid blue connector lines, green and red accent pills, icon-like squares, circles and bars only, crisp vector edges, soft grain, smooth easing, strictly abstract infographics with no letters, no numbers, no document-like text lines and no logos.` Les mêmes couleurs que l'habillage promokit (`overlays.colors`).
+- Chorégraphie concrète : quels modules, d'où ils arrivent, ce qui circule sur les connecteurs, ce qui change de couleur ; deux plans, `At 00:03.500, the camera cuts slightly closer` ; sujet dans les 60 % centraux (titre promokit en haut, sous-titres en bas).
+- Cohérence entre clips : le premier clip est l'ancre (T2VA) ; les suivants en Ref2VA avec une image de l'ancre (`refs: [{role: reference_image, frame: {clip: B_concept, t: 2.0}}]`) et `<Subject 1> is the motion design system in <Picture 1>: …` avec `fully_preserved` ; seule la chorégraphie et la couleur dominante changent.
+- Chiffres géants (`"200"`, `"404"`, `"500"` entre guillemets) : fiables et lisibles en style « flat 2D motion design, bold simple numerals, neon glow ». Lettres, mots, logos, interfaces : non fiables, à interdire explicitement (« no letters, no words, no logos, no interface, no pseudo-text »).
+- `overall_soundscape` : whooshes, ticks, pulses, glitch pour l'erreur, « No voices, no room tone, no music » ; `non_diegetic_music: N/A` (musique au montage).
+- Bibliothèque prête (flux, sécurité, base de données, cache, file, comparatif, erreur, succès, architecture, chiffres) : `.claude/skills/tiktok-learning/prompts/`.
+- Image de départ dessinée par promokit : `refs: [{role: first_frame, overlay: <id d'overlay>}]` (I2VA : l'instruction `For the target video, at 0.00 seconds…` en première ligne) ; H3 anime la carte ou le schéma dans son propre design. Contrôler la planche : le texte peut se déformer après 2 s.
+
 ## Contrôle après génération
 
 ```bash

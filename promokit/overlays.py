@@ -11,10 +11,54 @@ Item types:
   tap          touch ripple: x, y (frame px) or at {frame, image: [w, h], x, y} (screenshot px, fit contain), r, color
   image        picture placed on a transparent frame: src, w, x|align center, y, radius, shadow
   magnify      enlarged crop of a screenshot ("loupe"): src, box [x0, y0, x1, y1] (image px), w, x|align center, y, radius, border, border_width
+  code         syntax-highlighted code card (mono font): lines|text, lang (python|js|sql|bash|http|json|yaml|generic), size, w, x|align, y,
+               title, window (mac dots), numbers, hl [line numbers], style: terminal ($ prompt lines), bg, border, hl_color
 Colors accept #RRGGBB or #RRGGBBAA. Common text options: color, accent (words), accent_color.
 """
 from __future__ import annotations
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import pathlib, re
+
+CODE_COLORS = {"kw": "#FF7B72", "str": "#A5D6FF", "num": "#79C0FF", "cmt": "#8B949E", "fn": "#D2A8FF", "const": "#7EE787", "type": "#FFA657", "punct": "#C9D1D9", "prompt": "#3FB950", "muted": "#8B949E", "text": "#E6EDF3"}
+KEYWORDS = {
+    "python": "def class return if elif else for while in not and or import from as with try except finally raise yield lambda pass break continue True False None async await is del assert",
+    "js": "const let var function return if else for while in of new class extends import from export default async await try catch finally throw this true false null undefined typeof switch case break continue",
+    "sql": "select from where insert into values update set delete join left right inner outer on group by order having limit offset create table index primary key not null unique default as and or in is like between distinct count sum avg min max begin commit rollback transaction alter drop explain",
+    "bash": "if then else fi for do done while in echo export cd ls cat grep curl docker git npm pip python sudo apt exit return function local",
+    "http": "HTTP GET POST PUT PATCH DELETE HEAD OPTIONS", "go": "func package import return if else for range var const type struct interface map chan go defer select switch case nil true false",
+    "php": "function return if else elseif foreach for while class public private protected static new echo namespace use true false null",
+    "java": "public private protected class interface static void int long boolean return if else for while new this extends implements import try catch finally throw true false null",
+    "yaml": "true false null", "json": "true false null", "generic": "if else for while return function def class import from true false null",
+}
+TOKEN_RE = re.compile(r"(?P<cmt>#.*|//.*|--\s.*|/\*.*?\*/)|(?P<str>\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|`[^`]*`)|(?P<num>\b\d+(?:\.\d+)?\b)|(?P<word>[A-Za-z_][A-Za-z0-9_]*)|(?P<ws>\s+)|(?P<punct>.)")
+
+def tokenize(line: str, lang: str = "generic"):
+    """[(text, kind)] for a line of code; kind in CODE_COLORS."""
+    kws = set(KEYWORDS.get(lang, KEYWORDS["generic"]).split()); out = []; low = lang == "sql"
+    for m in TOKEN_RE.finditer(line):
+        k = m.lastgroup; t = m.group()
+        if k == "word":
+            nxt = line[m.end():m.end() + 1]
+            if (t.lower() if low else t) in kws: k = "kw"
+            elif lang == "http" and t.isupper() and len(t) > 2: k = "const"
+            elif nxt == "(": k = "fn"
+            elif t[:1].isupper() and not t.isupper() and lang in ("python", "js", "java", "go", "php"): k = "type"
+            elif t.isupper() and len(t) > 1: k = "const"
+            else: k = "text"
+            if lang in ("http", "yaml") and k == "text" and nxt == ":" and m.start() == len(line) - len(line.lstrip()): k = "type"
+        out.append((t, k))
+    return out
+
+def find_mono(project):
+    """Monospace font: overlays.fonts.mono, else JetBrains Mono / DejaVu Sans Mono found on the machine, else the body font."""
+    fonts = project.get("overlays", {}).get("fonts", {}); cands = []
+    if fonts.get("mono"): cands.append(project.path(fonts["mono"]))
+    names = ("JetBrainsMono.ttf", "JetBrainsMono-Regular.ttf", "JetBrainsMono[wght].ttf", "JetBrainsMonoNL-Regular.ttf")
+    for d in (project.dir / "assets" / "fonts", project.path(fonts.get("dir", "assets/fonts")), project.kit_root / "templates" / "project" / "assets" / "fonts",
+              pathlib.Path.home() / ".fonts", pathlib.Path.home() / ".local" / "share" / "fonts", pathlib.Path("/usr/share/fonts/truetype/jetbrains-mono")):
+        cands += [d / n for n in names]
+    cands += [pathlib.Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"), pathlib.Path("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf")]
+    return next((c for c in cands if c.exists()), project.path(fonts.get("body", "assets/fonts/DMSans.ttf")))
 
 def _hex(c): c = c.lstrip("#"); return tuple(int(c[i:i+2], 16) for i in (0, 2, 4))
 def _rgba(c, default_alpha=255):
@@ -25,14 +69,14 @@ class Painter:
     def __init__(self, project):
         ov = project.get("overlays", {}); self.project = project
         self.W, self.H = project["video"]["width"], project["video"]["height"]
-        f = ov.get("fonts", {}); self.font_h = project.path(f.get("heading", "assets/fonts/Sora.ttf")); self.font_b = project.path(f.get("body", "assets/fonts/DMSans.ttf"))
+        f = ov.get("fonts", {}); self.font_h = project.path(f.get("heading", "assets/fonts/Sora.ttf")); self.font_b = project.path(f.get("body", "assets/fonts/DMSans.ttf")); self.font_m = find_mono(project)
         c = ov.get("colors", {}); self.primary = _hex(c.get("primary", "#4a21ed")); self.accent = _hex(c.get("accent", "#b447eb")); self.ink = _hex(c.get("ink", "#111117"))
         self.w_heading = f.get("heading_weight", "Bold"); self.w_semibold = f.get("semibold_weight", "SemiBold"); self.w_body = f.get("body_weight", "Medium")
         self.default_bg = ov.get("background")
         self.out = project.overlays_dir; self.out.mkdir(parents=True, exist_ok=True)
     # ---- helpers
     def font(self, which, size, var=None):
-        f = ImageFont.truetype(str(self.font_h if which == "h" else self.font_b), int(size))
+        f = ImageFont.truetype(str({"h": self.font_h, "b": self.font_b, "m": self.font_m}.get(which, self.font_h)), int(size))
         if var:
             try: f.set_variation_by_name(var)
             except Exception: pass
@@ -241,6 +285,31 @@ class Painter:
             bx = min(CW - bw - 24, x + dw - bw + 40); by = max(24, y - 30)
             d.rounded_rectangle((bx, by, bx + bw, by + bh), radius=bh // 2, fill=self.primary); d.text((bx + 32 - bb[0], by + (bh - th) // 2 - bb[1]), it["badge"], font=f, fill=(255, 255, 255, 255))
         return bg.convert("RGB")
+    def code(self, it):
+        lines = [str(x) for x in (it.get("lines") or str(it.get("text", "")).split("\n"))]; lang = it.get("lang", "generic")
+        size = int(it.get("size", 34)); f = self.font("m", size); lh = int(self.tsize(f, "ÉgjpÀ|")[1] * float(it.get("spacing", 1.55))); pad = int(it.get("pad", 36))
+        w = int(it.get("w", self.W - 160)); header = 60 if it.get("window", True) else 0; numbers = it.get("numbers", False); gutter = int(size * 1.9) if numbers else 0
+        h = header + pad + lh * len(lines) + pad
+        x = (self.W - w) // 2 if it.get("align", "center") == "center" and "x" not in it else int(it.get("x", 80)); y = int(it.get("y", 640))
+        L = self.canvas(); d = ImageDraw.Draw(L)
+        d.rounded_rectangle((x, y, x + w, y + h), radius=int(it.get("radius", 26)), fill=_rgba(it.get("bg", "#0B0F14F5")), outline=_rgba(it.get("border", "#30363D")), width=3)
+        if header:
+            for i, c in enumerate(("#F85149", "#D29922", "#3FB950")): cx = x + pad + 6 + i * 30; d.ellipse((cx - 9, y + header // 2 - 9, cx + 9, y + header // 2 + 9), fill=_hex(c))
+            if it.get("title"): ft = self.font("m", int(size * 0.8)); tw, th, bb = self.tsize(ft, str(it["title"])); d.text((x + (w - tw) // 2 - bb[0], y + (header - th) // 2 - bb[1]), str(it["title"]), font=ft, fill=(139, 148, 158, 255))
+            d.line((x, y + header, x + w, y + header), fill=(48, 54, 61, 255), width=2)
+        hl = {int(v) for v in (it.get("hl") or [])}; term = it.get("style") == "terminal" or (lang == "bash" and it.get("style") != "code"); yy = y + header + pad
+        asc = f.getmetrics()[0]; base_off = int(lh * 0.12) + asc     # one baseline per line: punctuation stays aligned with letters
+        for li, ln in enumerate(lines):
+            if li + 1 in hl: d.rounded_rectangle((x + 10, yy - int(lh * 0.06), x + w - 10, yy + int(lh * 0.94)), radius=8, fill=_rgba(it.get("hl_color", "#58A6FF2E")))
+            xx = x + pad + gutter
+            if numbers: fn = self.font("m", int(size * 0.85)); d.text((xx - int(size * 0.8), yy + base_off), str(li + 1), font=fn, fill=(139, 148, 158, 150), anchor="rs")
+            toks = [("$ ", "prompt")] + tokenize(ln[2:], lang) if term and ln.startswith("$ ") else ([(ln, "muted")] if term else tokenize(ln, lang))
+            for t, k in toks:
+                if not t: continue
+                if t.strip(): d.text((xx, yy + base_off), t, font=f, fill=_rgba(CODE_COLORS.get(k, CODE_COLORS["text"])), anchor="ls")
+                xx += int(d.textlength(t, font=f))
+            yy += lh
+        return self.shadow(L, 30, (0, 14), int(it.get("shadow", 120)))
     def device_frame(self, it):
         x, y, w, h = int(it["x"]), int(it["y"]), int(it["w"]), int(it["h"]); r = int(it.get("radius", 56)); bz = int(it.get("bezel", 16))
         bg = self.brand_bg(spec=it.get("bg"))

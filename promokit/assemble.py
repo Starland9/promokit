@@ -8,6 +8,7 @@ Segment options: src (clip:<id> | scene:<name> | overlay:<id> | path), in, out, 
 crop_x / crop_y (0..1 reframing when the source aspect differs, e.g. 16:9 clip in a 9:16 video), frame (<device_frame overlay id>),
 xfade (seconds of crossfade into the next segment), xfade_kind.
 Time references: 12.5 | end | seg3+0.5 | <segment id>-0.2 (before its end) | beat:<id>+x | beatend:<id>-x | vo:<id>+x | voend:<id>+x
+Beat overlays (from/to) also accept word references into the beat's voice-over: "@mot", "@mot:2", "@mot.end", "@mot+0.3" (see `promokit words`).
 Audio: VO (optional tempo), clip ambience, music with sidechain ducking, loudnorm -16 LUFS, AAC 48 kHz.
 Captions: `captions: {mode: lines|words, burn: bool, ...}` -> build/subtitles.srt (+ captions.ass in words mode)."""
 from __future__ import annotations
@@ -50,6 +51,22 @@ class Assembler:
         if not bpm: raise ValueError(f"'{v}' needs timeline.bpm")
         beat = 60.0 / bpm
         return n * beat * (int(tl.get("beats_per_bar", 4)) if u.startswith("bar") else 1)
+    def beat_words(self, vo_id: str, tempo: float):
+        """[(word, start, end)] of a script segment's generated voice-over, tempo-adjusted, relative to the VO start."""
+        key = (vo_id, tempo)
+        if not hasattr(self, "_bw"): self._bw = {}
+        if key not in self._bw:
+            seg = next((x for x in self.p.get("script", []) if x["id"] == vo_id), None); path = self.vo_path({"id": vo_id})
+            if not seg or not path.exists(): raise LookupError(f"word reference needs the generated voice-over of '{vo_id}' (promokit vo)")
+            self._bw[key] = [(w, a, b) for w, a, b, _ in self.word_times(path, seg["text"], tempo, display=seg.get("display"))]
+        return self._bw[key]
+    def beat_rel(self, v, tl, beat, lead, tempo, what=""):
+        """Beat-relative time: seconds, musical ('2b', '1bar') or a word of the beat's voice-over ('@mot' -> beat_lead + word start)."""
+        if isinstance(v, str) and v.strip().startswith("@"):
+            from .hooks import resolve_word_ref
+            if not beat.get("vo"): raise ValueError(f"{what}: '{v}' needs a beat with vo:")
+            return lead + resolve_word_ref(v, self.beat_words(beat["vo"], tempo), what)
+        return self.mus(v, tl)
     def compile_beats(self, tl):
         a = dict(tl.get("audio", {})); tempo_default = float(a.get("vo_tempo", 1.0))
         lead_d, tail_d = float(tl.get("beat_lead", 0.25)), float(tl.get("beat_tail", 0.2))
@@ -102,7 +119,7 @@ class Assembler:
                 self.log(f"  warning: beat {bid} shots do not add up to {total:.2f}s")
             for o in beat.get("overlays", []):
                 o2 = {k: v for k, v in o.items() if k not in ("from", "to")}
-                fr, to = self.mus(o.get("from", 0.0), tl), self.mus(o.get("to", 0.0), tl)
+                fr, to = self.beat_rel(o.get("from", 0.0), tl, beat, lead, tempo, f"beat {bid} overlay {o.get('id')}"), self.beat_rel(o.get("to", 0.0), tl, beat, lead, tempo, f"beat {bid} overlay {o.get('id')}")
                 o2["t"] = [f"beat:{bid}+{fr}" if fr >= 0 else f"beatend:{bid}-{-fr}", f"beatend:{bid}-{-to}" if to <= 0 else f"beat:{bid}+{to}"]
                 ovs.append(o2)
             beats_meta.append({"id": bid, "first": segs[first_idx]["id"], "len": total, "vo_len": Lvo})
