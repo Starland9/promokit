@@ -871,4 +871,23 @@ class Painter:
                 log(f"  overlay {it['id']} ({it['type']})")
             except FileNotFoundError as e:
                 log(f"  overlay {it['id']} skipped: {e}")
+        self.check_caption_overlap(log)
         return outs
+
+    def check_caption_overlap(self, log=print):
+        """Warn when a chip's bottom edge runs into the burned-caption band (`chip()` anchors `y` at the
+        TOP with height size*2.38; `write_captions()` in assemble.py anchors `captions.y` at the BOTTOM of
+        the text). Nothing else compares the two, so a beat with several stacked chips (e.g. numbered steps)
+        can silently collide with the word-by-word subtitles once real voice-over durations are in."""
+        cap = self.project.get("captions", {}) or {}
+        if not cap.get("burn"):
+            return
+        cap_y = int(cap.get("y", int(self.H * 0.75)))
+        cap_size = int(cap.get("size", 76))
+        cap_top = cap_y - int(cap_size * 1.3)  # rough allowance for caps-height + outline above the anchor
+        for it in self.project.get("overlays", {}).get("items", []):
+            if it.get("type") != "chip" or "y" not in it:
+                continue
+            bottom = int(it["y"]) + int(int(it.get("size", 32)) * 2.38)
+            if bottom > cap_top:
+                log(f"  warning: chip {it['id']} bottom (y={bottom}) is close to or overlaps the caption band (starts ~y={cap_top}); move it up (lower y) or shorten the stack")
