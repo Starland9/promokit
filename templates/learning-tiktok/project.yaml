@@ -148,7 +148,7 @@ captions:
   caps: true
   max_words: 3
   highlight: "#58A6FF"
-  y: 1450
+  y: 1700
   keep: []                              # expressions à ne jamais couper entre deux sous-titres (sigles, marques)
 
 # Musique (piste libre, une fois) : curl -L -o assets/music/bed.mp3 https://assets.mixkit.co/music/1167/1167.mp3

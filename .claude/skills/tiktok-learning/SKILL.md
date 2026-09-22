@@ -19,7 +19,7 @@ Le design et l'animation viennent de **MiniMax H3** (clips motion design 2D, pro
 | Néon H3 + slide blanche + pastille grise dans la même vidéo | trois styles | un système visuel par série : mêmes couleurs dans `overlays.colors` et dans les prompts H3 (fond charbon, un accent, vert = ok, rouge = problème, ambre = étape) |
 | Lignes grises « pseudo-texte » et faux boutons dans les clips | H3 invente des interfaces | prompt : « no letters, no numbers, no document-like text lines, no logos » ; le texte réel est ajouté par promokit |
 | 10 s sur le même fond avec un titre | plan figé | un changement visuel toutes les 2-4 s : clip H3 (6 s, `fixed`) → fond + pastilles qui arrivent sur les mots → carte de code |
-| Sous-titres sur les pastilles, texte sous les icônes TikTok | zones ignorées | titres y 240-330, pastilles y 520-900, code y 620-1100, sous-titres y 1450 ; rien à droite (x > 940) sous y 900 |
+| Sous-titres sur les pastilles, texte sous les icônes TikTok | zones ignorées | titres y 240-330, pastilles y 520-900, code y 620-1100, sous-titres y 1700 ; rien à droite (x > 940) sous y 900 |
 | Le titre répète la phrase dite | doublon | le titre nomme le concept (2-4 mots), la voix raconte, les pastilles prouvent |
 | Carte de fin coupée, silence avant la fin | beat trop court | `extra: 1.5` sur le dernier beat, `beat_tail: 0.35` |
 
@@ -58,7 +58,7 @@ Variantes : concept « comparatif » (REST vs GraphQL) → beats `a`, `b`, `crit
 - **Carte de code** : `type: code`, ≤ 5 lignes, `hl` sur la ligne qui compte, `lang` juste (http, sql, python, bash = terminal). Un exemple réel et court vaut mieux qu'une liste.
 - **Fond** : `type: background` avec 2 blobs de la couleur sémantique du beat (alpha 16-22, blur 100) ; `zoom 1.06-1.10` + `zoom_y` différent par beat pour que le fond vive.
 - **Mouvement** : `slide: 22` sur les pastilles, `fade` 0.3-0.4 par défaut ; titre à `from: 0.0`, pastilles sur `@mot`.
-- Interdits : carte blanche pleine largeur avec du texte, capture d'une doc, emoji, plus de 2 polices, texte sous y 1500 hors sous-titres, pastille de plus de 5 mots.
+- Interdits : carte blanche pleine largeur avec du texte, capture d'une doc, emoji, plus de 2 polices, texte sous y 1650 hors sous-titres, pastille de plus de 5 mots.
 
 ## 5. Clips H3 en motion design 2D (le design vient de MiniMax)
 

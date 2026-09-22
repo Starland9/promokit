@@ -59,7 +59,7 @@ overlays:
     - {id: chip, type: chip, text: "17 modèles · Export PDF", align: center, y: 200, size: 40}
     - {id: endcard, type: endcard, headline: "Crée le CV qui te ressemble.", headline_size: 96, url: cv.starland9.dev, url_size: 64, y: 560}
 
-captions: {mode: words, burn: true, font: Promokit Caption, font_file: ../../templates/project/assets/fonts/Sora.ttf, weight: 800, size: 76, caps: true, max_words: 3, highlight: "#FFD84D", y: 1450, keep: ["Fais Mon CV"]}
+captions: {mode: words, burn: true, font: Promokit Caption, font_file: ../../templates/project/assets/fonts/Sora.ttf, weight: 800, size: 76, caps: true, max_words: 3, highlight: "#FFD84D", y: 1700, keep: ["Fais Mon CV"]}
 
 timeline:
   audio:
